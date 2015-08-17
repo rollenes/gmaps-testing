@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simple Map</title>
+        <meta name="viewport" content="initial-scale=1.0">
+        <meta charset="utf-8">
+        <style>
+            html, body, #all {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #all {
+                position: relative;
+            }
+            #map {
+                height: 100%;
+                width: 99%;
+                position: absolute;
+            }
+            #right {
+                height: 100%;
+                width: 1%;
+                background-color: #ccc;
+                position: absolute;
+                right: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="all">
+            <div id="map"></div>
+            <div id="right"></div>
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+
+            var socket = io('http://localhost:8011');
+
+            var map;
+            var markers = [];
+
+            function initMap() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: 50.3, lng: 18.8},
+                    zoom: 9
+                });
+
+                socket.on('all', function(all) {
+                    for (id in all) {
+                        if (markers[id] === undefined) {
+                            markers[id] = createMarker(all[id], id);
+                        } else {
+                            markers[id].setPosition(all[id]);
+                        }
+                    }
+                });
+            }
+
+            function createMarker(pos, id) {
+                return new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    icon: 'airplane.gif',
+                    title: id
+                });
+            }
+
+            var menu = document.getElementById('right');
+
+            menu.onmouseover = function () {
+                this.style.width = '200px';
+            }
+
+            menu.onmouseout = function(){
+                this.style.width = '1%';
+            }
+
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
+    </body>
+</html>
+
